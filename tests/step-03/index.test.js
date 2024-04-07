@@ -15,7 +15,18 @@ test("Parse SQL Query", () => {
   expect(parsed).toEqual({
     fields: ["id", "name"],
     table: "sample",
+    whereClause: null,
   });
+});
+
+test('Parse SQL Query with WHERE clause', () => {
+    const query = 'SELECT id, name FROM sample WHERE age = 30';
+    const parsed = parseQuery(query);
+    expect(parsed).toEqual({
+        fields: ['id', 'name'],
+        table: 'sample',
+        whereClause: 'age = 30'
+    });
 });
 
 test('Parse Invalid SQL Query -No FROM - Throw Error', () => {
