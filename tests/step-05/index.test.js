@@ -20,11 +20,11 @@ test("Parse SQL Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    isDistinct: false,
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
-    "limit": null,
+    limit: null,
     orderByFields: null,
-
   });
 });
 
@@ -55,8 +55,9 @@ test("Parse SQL Query with WHERE Clause", () => {
     joinTable: null,
     joinType: null,
     groupByFields: null,
+    isDistinct: false,
     hasAggregateWithoutGroupBy: false,
-    "limit": null,
+    limit: null,
     orderByFields: null,
   });
 });

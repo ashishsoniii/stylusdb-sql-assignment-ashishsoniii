@@ -40,6 +40,7 @@ async function executeSELECTQuery(query) {
       hasAggregateWithoutGroupBy,
       orderByFields,
       limit,
+      isDistinct
     } = parseQuery(query);
     let data = await readCSV(`${table}.csv`);
 
@@ -140,13 +141,31 @@ async function executeSELECTQuery(query) {
         orderedResults = orderedResults.slice(0, limit);
       }
 
-      return orderedResults.map((row) => {
+      let fss = orderedResults.map((row) => {
         const selectedRow = {};
         fields.forEach((field) => {
           selectedRow[field] = row[field];
         });
         return selectedRow;
       });
+
+
+
+
+      let distinctResults = fss;
+      if (isDistinct) {
+          distinctResults = [...new Map(fss.map(item => [fields.map(field => item[field]).join('|'), item])).values()];
+      }
+
+      let limitResults = distinctResults;
+      if (limit !== null) {
+          limitResults = distinctResults.slice(0, limit);
+      }
+
+      return limitResults;
+
+    
+
     }
   } catch (error) {
     // Log error and provide user-friendly message
