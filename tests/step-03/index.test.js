@@ -20,6 +20,7 @@ test("Parse SQL Query", () => {
     joinTable: null,
     "limit": null,
     "isDistinct": false,
+    
     joinType:null,
     groupByFields: null,
     hasAggregateWithoutGroupBy:false,
@@ -52,10 +53,10 @@ test('Parse SQL Query with WHERE clause', () => {
 
 test('Parse Invalid SQL Query -No FROM - Throw Error', () => {
     const invalidQuery = 'SELECT id name student';
-    expect(() => parseQuery(invalidQuery)).toThrow('Invalid SELECT format');
+    expect(() => parseQuery(invalidQuery)).toThrow("Query parsing error: Invalid SELECT clause. Ensure it follows 'SELECT field1, field2 FROM table' format.");
 });
 
 test('Parse Invalid SQL Query  - Throw Error', () => {
     const invalidQuery = 'id name FROM student';
-    expect(() => parseQuery(invalidQuery)).toThrow('Invalid SELECT format');
+    expect(() => parseQuery(invalidQuery)).toThrow("Query parsing error: Invalid SELECT clause. Ensure it follows 'SELECT field1, field2 FROM table' format.");
 });
