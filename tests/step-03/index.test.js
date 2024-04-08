@@ -18,6 +18,7 @@ test("Parse SQL Query", () => {
     whereClauses: [],
     "joinCondition": null,
     joinTable: null,
+    "limit": null,
     joinType:null,
     groupByFields: null,
     hasAggregateWithoutGroupBy:false,
@@ -40,6 +41,7 @@ test('Parse SQL Query with WHERE clause', () => {
         ,"value" : "30"}],
         groupByFields: null,
         hasAggregateWithoutGroupBy:false,
+        "limit": null,
         orderByFields: null,
 
         
