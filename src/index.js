@@ -1,4 +1,4 @@
-const { parseSelectQuery, parseInsertQuery } = require('./queryParser');
+const { parseSelectQuery, parseInsertQuery, parseDeleteQuery } = require('./queryParser');
 const { readCSV, writeCSV } = require('./csvReader');
 
 function evaluateCondition(row, clause) {
@@ -397,5 +397,21 @@ function parseValue(value) {
   }
   return value;
 }
+async function executeDELETEQuery(query) {
+  const { table, whereClauses } = parseDeleteQuery(query);
+  let data = await readCSV(`${table}.csv`);
 
-module.exports = { executeSELECTQuery, executeINSERTQuery };
+
+module.exports = { executeSELECTQuery, executeINSERTQuery };	    if (whereClauses.length > 0) {
+      data = data.filter(row => !whereClauses.every(clause => evaluateCondition(row, clause)));
+  } else {
+      data = [];
+  }
+
+  await writeCSV(`${table}.csv`, data);
+
+  return { message: "Rows deleted successfully." };
+}
+
+
+module.exports = { executeSELECTQuery, executeINSERTQuery, executeDELETEQuery };

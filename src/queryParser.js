@@ -4,11 +4,10 @@ function parseSelectQuery(query) {
 
     let isDistinct = false;
 
-    if (query.toUpperCase().includes('SELECT DISTINCT')) {
-        isDistinct = true;
-        query = query.replace('SELECT DISTINCT', 'SELECT');
+    if (query.toUpperCase().includes("SELECT DISTINCT")) {
+      isDistinct = true;
+      query = query.replace("SELECT DISTINCT", "SELECT");
     }
-
 
     const limitRegex = /\sLIMIT\s(\d+)/i;
     const limitMatch = query.match(limitRegex);
@@ -89,7 +88,7 @@ function parseSelectQuery(query) {
       hasAggregateWithoutGroupBy,
       hasAggregateWithoutGroupBy,
       limit,
-      isDistinct
+      isDistinct,
     };
   } catch (error) {
     // Customize error message or log details if needed
@@ -116,24 +115,27 @@ function checkAggregateWithoutGroupBy(query, groupByFields) {
 //  }
 
 function parseWhereClause(whereString) {
-    const conditionRegex = /(.*?)(=|!=|>|<|>=|<=)(.*)/;
-    return whereString.split(/ AND | OR /i).map(conditionString => {
-        if (conditionString.includes(' LIKE ')) {
-            console.log(conditionString);
-            const [field, pattern] = conditionString.split(/\sLIKE\s/i);
-            return { field: field.trim(), operator: 'LIKE', value: pattern.trim().replace(/^'(.*)'$/, '$1') };
-        } else {
-            const match = conditionString.match(conditionRegex);
-            if (match) {
-                const [, field, operator, value] = match;
-                return { field: field.trim(), operator, value: value.trim() };
-            }
-            throw new Error('Invalid WHERE clause format');
-        }
-        
-    });
+  const conditionRegex = /(.*?)(=|!=|>|<|>=|<=)(.*)/;
+  return whereString.split(/ AND | OR /i).map((conditionString) => {
+    if (conditionString.includes(" LIKE ")) {
+      console.log(conditionString);
+      const [field, pattern] = conditionString.split(/\sLIKE\s/i);
+      return {
+        field: field.trim(),
+        operator: "LIKE",
+        value: pattern.trim().replace(/^'(.*)'$/, "$1"),
+      };
+    } else {
+      const match = conditionString.match(conditionRegex);
+      if (match) {
+        const [, field, operator, value] = match;
+        return { field: field.trim(), operator, value: value.trim() };
+      }
+      throw new Error("Invalid WHERE clause format");
+    }
+  });
 }
-        
+
 function parseJoinClause(query) {
   const joinRegex =
     /\s(INNER|LEFT|RIGHT) JOIN\s(.+?)\sON\s([\w.]+)\s*=\s*([\w.]+)/i;
@@ -157,21 +159,46 @@ function parseJoinClause(query) {
   };
 }
 
-function parseInsertQuery(query) {
-    const insertRegex = /INSERT INTO (\w+)\s\((.+)\)\sVALUES\s\((.+)\)/i;
-    const match = query.match(insertRegex);
+function parseDeleteQuery(query) {
+  const deleteRegex = /DELETE FROM (\w+)( WHERE (.*))?/i;
+  const match = query.match(deleteRegex);
 
-    if (!match) {
-        throw new Error("Invalid INSERT INTO syntax.");
-    }
+  if (!match) {
+    throw new Error("Invalid DELETE syntax.");
+  }
 
-    const [, table, columns, values] = match;
-    return {
-        type: 'INSERT',
-        table: table.trim(),
-        columns: columns.split(',').map(column => column.trim()),
-        values: values.split(',').map(value => value.trim())
-    };
+  const [, table, , whereString] = match;
+  let whereClauses = [];
+  if (whereString) {
+    whereClauses = parseWhereClause(whereString);
+  }
+  return {
+    type: "DELETE",
+    table: table.trim(),
+    whereClauses,
+  };
 }
 
-module.exports = { parseSelectQuery, parseJoinClause, parseInsertQuery };
+function parseInsertQuery(query) {
+  const insertRegex = /INSERT INTO (\w+)\s\((.+)\)\sVALUES\s\((.+)\)/i;
+  const match = query.match(insertRegex);
+
+  if (!match) {
+    throw new Error("Invalid INSERT INTO syntax.");
+  }
+
+  const [, table, columns, values] = match;
+  return {
+    type: "INSERT",
+    table: table.trim(),
+    columns: columns.split(",").map((column) => column.trim()),
+    values: values.split(",").map((value) => value.trim()),
+  };
+}
+
+module.exports = {
+  parseSelectQuery,
+  parseJoinClause,
+  parseInsertQuery,
+  parseDeleteQuery,
+};
