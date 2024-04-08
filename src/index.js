@@ -1,5 +1,5 @@
-const { parseQuery } = require("./queryParser");
-const readCSV = require("./csvReader");
+const { parseSelectQuery, parseInsertQuery } = require('./queryParser');
+const { readCSV, writeCSV } = require('./csvReader');
 
 function evaluateCondition(row, clause) {
   let { field, operator, value } = clause;
@@ -47,7 +47,7 @@ async function executeSELECTQuery(query) {
       orderByFields,
       limit,
       isDistinct
-    } = parseQuery(query);
+    } = parseSelectQuery(query);
     let data = await readCSV(`${table}.csv`);
 
     if (joinTable && joinCondition) {
@@ -197,6 +197,33 @@ function performInnerJoin(data, joinData, joinCondition, fields, table) {
         }, {});
       });
   });
+}
+
+
+
+async function executeINSERTQuery(query) {
+  console.log(parseInsertQuery(query));
+  const { table, columns, values } = parseInsertQuery(query);
+  const data = await readCSV(`${table}.csv`);
+
+  // Create a new row object
+  const newRow = {};
+  columns.forEach((column, index) => {
+      // Remove single quotes from the values
+      let value = values[index];
+      if (value.startsWith("'") && value.endsWith("'")) {
+          value = value.substring(1, value.length - 1);
+      }
+      newRow[column] = value;
+  });
+
+  // Add the new row to the data
+  data.push(newRow);
+
+  // Save the updated data back to the CSV file
+  await writeCSV(`${table}.csv`, data); // Implement writeCSV function
+
+  return { message: "Row inserted successfully." };
 }
 
 function performLeftJoin(data, joinData, joinCondition, fields, table) {
@@ -371,4 +398,4 @@ function parseValue(value) {
   return value;
 }
 
-module.exports = executeSELECTQuery;
+module.exports = { executeSELECTQuery, executeINSERTQuery };

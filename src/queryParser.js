@@ -1,4 +1,4 @@
-function parseQuery(query) {
+function parseSelectQuery(query) {
   try {
     query = query.trim();
 
@@ -157,4 +157,21 @@ function parseJoinClause(query) {
   };
 }
 
-module.exports = { parseQuery, parseJoinClause };
+function parseInsertQuery(query) {
+    const insertRegex = /INSERT INTO (\w+)\s\((.+)\)\sVALUES\s\((.+)\)/i;
+    const match = query.match(insertRegex);
+
+    if (!match) {
+        throw new Error("Invalid INSERT INTO syntax.");
+    }
+
+    const [, table, columns, values] = match;
+    return {
+        type: 'INSERT',
+        table: table.trim(),
+        columns: columns.split(',').map(column => column.trim()),
+        values: values.split(',').map(value => value.trim())
+    };
+}
+
+module.exports = { parseSelectQuery, parseJoinClause, parseInsertQuery };
