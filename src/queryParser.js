@@ -103,18 +103,37 @@ function checkAggregateWithoutGroupBy(query, groupByFields) {
   return aggregateFunctionRegex.test(query) && !groupByFields;
 }
 
-function parseWhereClause(whereString) {
-  const conditionRegex = /(.*?)(=|!=|>|<|>=|<=)(.*)/;
-  return whereString.split(/ AND | OR /i).map((conditionString) => {
-    const match = conditionString.match(conditionRegex);
-    if (match) {
-      const [, field, operator, value] = match;
-      return { field: field.trim(), operator, value: value.trim() };
-    }
-    throw new Error("Invalid WHERE clause format");
-  });
-}
+//function parseWhereClause(whereString) {
+//    const conditionRegex = /(.*?)(=|!=|>|<|>=|<=)(.*)/;
+//    return whereString.split(/ AND | OR /i).map((conditionString) => {
+//      const match = conditionString.match(conditionRegex);
+//      if (match) {
+//        const [, field, operator, value] = match;
+//        return { field: field.trim(), operator, value: value.trim() };
+//      }
+//      throw new Error("Invalid WHERE clause format");
+//    });
+//  }
 
+function parseWhereClause(whereString) {
+    const conditionRegex = /(.*?)(=|!=|>|<|>=|<=)(.*)/;
+    return whereString.split(/ AND | OR /i).map(conditionString => {
+        if (conditionString.includes(' LIKE ')) {
+            console.log(conditionString);
+            const [field, pattern] = conditionString.split(/\sLIKE\s/i);
+            return { field: field.trim(), operator: 'LIKE', value: pattern.trim().replace(/^'(.*)'$/, '$1') };
+        } else {
+            const match = conditionString.match(conditionRegex);
+            if (match) {
+                const [, field, operator, value] = match;
+                return { field: field.trim(), operator, value: value.trim() };
+            }
+            throw new Error('Invalid WHERE clause format');
+        }
+        
+    });
+}
+        
 function parseJoinClause(query) {
   const joinRegex =
     /\s(INNER|LEFT|RIGHT) JOIN\s(.+?)\sON\s([\w.]+)\s*=\s*([\w.]+)/i;

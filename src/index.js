@@ -9,6 +9,12 @@ function evaluateCondition(row, clause) {
   const rowValue = parseValue(row[field]);
   let conditionValue = parseValue(value);
 
+  if (operator === 'LIKE') {
+    const regexPattern = '^' + value.replace(/%/g, '.*').replace(/_/g, '.') + '$';
+    const regex = new RegExp(regexPattern, 'i'); // 'i' for case-insensitive matching
+    return regex.test(row[field]);
+}
+
   switch (operator) {
     case "=":
       return rowValue === conditionValue;
